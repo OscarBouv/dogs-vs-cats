@@ -10,8 +10,8 @@ class TrainingSession:
     """
 
     def __init__(self, model, train_loader, test_loader,
-                 optimizer, scheduler, epochs, device,
-                 writer, print_ratio=10, start_epoch=0):
+                 optimizer, epochs, device,
+                 writer, display_ratio):
 
         self.model = model
         self.train_loader = train_loader
@@ -19,13 +19,11 @@ class TrainingSession:
 
         self.optimizer = optimizer
         self.epochs = epochs
-        self.scheduler = scheduler
 
         self.device = device
         self.writer = writer
 
-        self.print_ratio = print_ratio
-        self.start_epoch = start_epoch
+        self.display_ratio = display_ratio
 
     def train_one_epoch(self, criterion, epoch):
 
@@ -39,7 +37,7 @@ class TrainingSession:
 
         Returns
         -------
-        self : fitted model.
+        self : average losses of training epoch.
 
         """
 
@@ -63,7 +61,7 @@ class TrainingSession:
             # measure record loss
             losses.update(loss.item(), x.size(0))
 
-            if i % self.print_ratio == 0:
+            if i % self.display_ratio == 0:
                 print(f"Epoch: [{epoch}][{i}/{len(self.train_loader)}]")
 
             self.writer.add_scalar("Loss Train [AVG]", losses.avg, epoch)
@@ -99,7 +97,7 @@ class TrainingSession:
                 losses.update(loss.item(), x_val.size(0))
                 accuracies.update(accuracy.item(), x_val.size(0))
 
-                if i % self.print_ratio == 0:
+                if i % self.display_ratio == 0:
                     print(f'Test: [{i}/{len(self.test_loader)}]')
 
         self.writer.add_scalar("Loss Val [AVG]", losses.avg, epoch)
@@ -118,21 +116,19 @@ class TrainingSession:
         criterion = torch.nn.BCEWithLogitsLoss().to(self.device)
 
         # Supervised train loop
-        for epoch in range(self.start_epoch, self.epochs):
-
-            print(f"Current lr {self.optimizer.param_groups[0]['lr']}")
+        for epoch in range(self.epochs):
 
             trainloss = self.train_one_epoch(criterion, epoch)
 
             print('Loss/train', trainloss, epoch)
-
-            self.scheduler.step()
 
             # evaluate on validation set
             val_acc, val_loss = self.validate(criterion, epoch)
 
             print(f'Acc/valid at epoch {epoch} : {val_acc}')
             print(f'Loss/valid at epoch {epoch} : {val_loss}')
+
+        self.writer.close()
 
 
 if __name__ == "__main__":

@@ -8,53 +8,56 @@ from data_handler import DogsVsCatsDataset
 from model import BaseCNN
 from train import TrainingSession
 
-def main():
+from parser import get_parser
+
+def main(args):
     """
         Documentation #TODO
     """
 
     model = BaseCNN()
 
-    batch_size = 32
-
-    base_transform = transforms.Compose([transforms.ToTensor(),
+    train_transforms = transforms.Compose([transforms.ToTensor(),
                                          transforms.Normalize((0.485, 0.456, 0.406),
                                                               (0.229, 0.224, 0.225))])
 
-    train_dataset = DogsVsCatsDataset("data/train/", transform=base_transform)
-    test_dataset = DogsVsCatsDataset("data/test1/", transform=base_transform)
+    test_transforms = transforms.Compose([transforms.ToTensor(),
+                                         transforms.Normalize((0.485, 0.456, 0.406),
+                                                              (0.229, 0.224, 0.225))])
+
+    train_dataset = DogsVsCatsDataset("data/train/", transform=train_transforms)
+    test_dataset = DogsVsCatsDataset("data/test1/", transform=test_transforms)
 
     print("Downloaded dataset done.")
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=True)
 
     optimizer = torch.optim.SGD(model.parameters(),
-                                    #lr=args.lr,
-                                    lr = 0.1,
-                                    momentum=0.9,
-                                    weight_decay=1e-4,
-                                    nesterov=True)
-
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,
-                                                           T_max=len(train_loader) * 10,
-                                                           eta_min=0.03 * 0.004)
+                                lr = args.lr,
+                                momentum=args.momentum,
+                                weight_decay=args.weight_decay,
+                                nesterov=True)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     writer = SummaryWriter()
+
+    print(f"Running training session on {device} ...")
 
     training_session = TrainingSession(model=model,
                                        train_loader=train_loader,
                                        test_loader=test_loader,
                                        optimizer=optimizer,
-                                       scheduler=scheduler,
-                                       epochs=4,
+                                       epochs=args.epochs,
                                        device=device,
-                                       writer=writer)
+                                       writer=writer,
+                                       display_ratio=args.display_ratio,
+                                       )
 
     training_session.run_train()
 
 
 if __name__ == "__main__":
 
-    main()
+    args = get_parser().parse_args()
+    main(args)

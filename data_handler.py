@@ -4,6 +4,7 @@ from torchvision.io import read_image
 from torchvision.transforms import ToTensor
 
 import PIL
+import numpy as np
 
 class DogsVsCatsDataset(Dataset):
     """
@@ -31,61 +32,44 @@ class DogsVsCatsDataset(Dataset):
 
         return image, label
 
-class ValSplitLoader():
+class ValSplit():
 
-    def __init__(self, dataset):
-        self.dataset = dataset
+    def __init__(self, validation_split):
+        self.validation_split = validation_split
 
-    def get_train_val_loader(self, batch_size, validation_split):
+    def get_train_val_loader(self, dataset, batch_size=32):
 
-        indices = np.arange(len(self.dataset))
-        np.random.shuffle(indices)
+        if self.validation_split > 0:
+            indices = np.arange(0, len(dataset), dtype=int)
+            np.random.shuffle(indices)
 
-        train_indices = indices[0:validation_split * len(self.dataset)]
-        val_indices = indices[validation_split * len(self.dataset):]
+            train_indices = indices[int(self.validation_split * len(dataset)):]
+            val_indices = indices[0:int(self.validation_split * len(dataset))]
 
-        train_loader = DataLoader(Subset(self.dataset, train_indices),
-                                  batch_size=batch_size,
-                                  shuffle=True)
+            train_loader = DataLoader(Subset(dataset, train_indices),
+                                      batch_size=batch_size,
+                                      shuffle=True)
 
-        val_loader = Subset(self.dataset, val_indices)
+            val_loader = DataLoader(Subset(dataset, val_indices),
+                                    batch_size=batch_size,
+                                    shuffle=True)
 
-        return train_loader, val_loader
+            return train_loader, val_loader
 
+        else:
 
+            train_loader = DataLoader(dataset,
+                                      batch_size=batch_size,
+                                      shuffle=True)
 
-
-
-
-        
-
-
-# class DogsVsCatLoader():
-
-#     def __init__(self, path, transform=None, target_transform=None):
-
-#         self.path = path
-#         self.transform = transform
-#         self.target_transform = target_transform
-
-#     def get_loader(batch_size):
-
-#         data = DogsVsCatsDataset(self.path, )
-
-#         return DataLoader(dataset=self.dataset,
-#                           batch_size=batch_size,
-#                           shuffle=True,
-#                           transforms=self.transform,
-#                           )
-
+            return train_loader, None
 
 
 if __name__ == "__main__":
 
     dataset = DogsVsCatsDataset("data/train/", transform = ToTensor())
-    idx = np.random.randint(0, len(dataset))
 
-    img, label = dataset.__getitem__(idx)
+    val_split = ValSplit(0.1)
+    train_loader, val_loader = val_split.get_train_val_loader(dataset, 4)
 
-    print(type(img))
-    print(img.shape)
+    print(len(train_loader), len(val_loader))

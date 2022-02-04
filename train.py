@@ -8,13 +8,13 @@ class TrainingSession:
         Documentation #TODO
     """
 
-    def __init__(self, model, train_loader, test_loader,
+    def __init__(self, model, train_loader, val_loader,
                  optimizer, epochs, device,
                  writer, display_ratio):
 
         self.model = model
         self.train_loader = train_loader
-        self.test_loader = test_loader
+        self.val_loader = val_loader
 
         self.optimizer = optimizer
         self.epochs = epochs
@@ -77,7 +77,7 @@ class TrainingSession:
 
         with torch.no_grad():
 
-            for i, (x_val, y_val) in enumerate(self.test_loader):
+            for i, (x_val, y_val) in enumerate(self.val_loader):
 
                 x_val = x_val.to(self.device)
                 y_val = y_val.to(self.device)
@@ -97,7 +97,7 @@ class TrainingSession:
                 accuracies.update(accuracy.item(), x_val.size(0))
 
                 if i % self.display_ratio == 0:
-                    print(f'Test: [{i}/{len(self.test_loader)}]')
+                    print(f'Val: [{i}/{len(self.val_loader)}]')
 
         self.writer.add_scalar("Loss Val [AVG]", losses.avg, epoch)
         self.writer.add_scalar("Accuracy Val [AVG]", accuracies.avg, epoch)

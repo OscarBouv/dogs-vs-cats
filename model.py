@@ -1,4 +1,3 @@
-from lib2to3.pytree import Base
 from torch import nn
 import torch
 from torchvision import models

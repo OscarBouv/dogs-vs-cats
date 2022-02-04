@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 
-from data_handler import DogsVsCatsDataset
+from data_handler import DogsVsCatsDataset, ValSplit
 from model import BaseCNN, PretrainedVGG19
 from train import TrainingSession
 
@@ -15,7 +15,7 @@ def main(args):
         Documentation #TODO
     """
 
-    if args.conv_net == "basecnn":
+    if args.conv_net == "base_cnn":
         model = BaseCNN()
 
     elif args.conv_net == "vgg":
@@ -36,14 +36,14 @@ def main(args):
 
     print("Downloaded dataset done.")
 
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=True)
+    val_split = ValSplit(args.validation_split)
+    train_loader, val_loader = val_split.get_train_val_loader(train_dataset, args.batch_size)
+
+    #test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=True)
 
     optimizer = torch.optim.Adam(model.parameters(),
                                  lr=args.lr,
-                                 momentum=args.momentum,
                                  weight_decay=args.weight_decay,
-                                 nesterov=True,
                                  betas=(0.9, 0.999))
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -53,7 +53,7 @@ def main(args):
 
     training_session = TrainingSession(model=model,
                                        train_loader=train_loader,
-                                       test_loader=test_loader,
+                                       val_loader=val_loader,
                                        optimizer=optimizer,
                                        epochs=args.epochs,
                                        device=device,

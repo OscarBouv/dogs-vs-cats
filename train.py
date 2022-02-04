@@ -2,7 +2,7 @@ from utils import AverageMeter
 from sklearn.metrics import accuracy_score
 import torch
 import numpy as np
-
+import dill as dill
 class TrainingSession:
 
     """
@@ -54,7 +54,7 @@ class TrainingSession:
 
             y_pred = self.model(x)
 
-            loss = criterion(y_pred, y.view(-1, 1).to(torch.float32))
+            loss = criterion(y_pred, y)
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -66,19 +66,15 @@ class TrainingSession:
             if i % self.display_ratio == 0:
                 print(f"Epoch: [{epoch}][{i}/{len(self.train_loader)}]")
 
-            # self.writer.add_scalar("Loss Train [AVG]", losses.avg, epoch)
-            # self.writer.flush()
 
         return losses.avg
 
-    def validate(self, criterion, epoch):
+    def validate(self, criterion, val_loss_min):
 
         losses = AverageMeter()
         accuracies = AverageMeter()
 
         self.model.eval()
-
-        val_loss_min = np.inf
 
         with torch.no_grad():
 
@@ -109,23 +105,20 @@ class TrainingSession:
 
             if val_loss <= val_loss_min:
                 print(f'Val loss decreased ({val_loss_min} --> {val_loss}).  Saving model ...')
-                torch.save(self.model.state_dict(), 'model.pth')
+                torch.save(self.model.state_dict(), 'model.pth', pickle=dill)
                 val_loss_min = val_loss
 
-        # self.writer.add_scalar("Loss Val [AVG]", val_loss, epoch)
-        # self.writer.add_scalar("Accuracy Val [AVG]", accuracies.avg, epoch)
-
-        # self.writer.flush()
-
-        return accuracies.avg, val_loss
+        return accuracies.avg, val_loss, val_loss_min
 
     def run_train(self):
 
         # load self.model
         self.model.to(self.device)
 
-        # # criterion
+        # criterion
         criterion = torch.nn.BCEWithLogitsLoss().to(self.device)
+
+        val_loss_min = np.inf
 
         # Supervised train loop
         for epoch in range(self.epochs):
@@ -135,12 +128,12 @@ class TrainingSession:
             print('Loss/train', trainloss, epoch)
 
             # evaluate on validation set
-            val_acc, val_loss = self.validate(criterion, epoch)
+            val_acc, val_loss, val_loss_min = self.validate(criterion, epoch, val_loss_min)
 
             print(f'Acc/valid at epoch {epoch} : {val_acc}')
             print(f'Loss/valid at epoch {epoch} : {val_loss}')
 
-        self.writer.close()
+        #self.writer.close()
 
 
 if __name__ == "__main__":

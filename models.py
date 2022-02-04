@@ -66,7 +66,7 @@ class PretrainedVGG19(nn.Module):
                           ('fc2', nn.Linear(1028, 512)),
                           ('relu2', nn.ReLU()),
                           ('dropout2', nn.Dropout(0.5)),
-                          ('fc3', nn.Linear(512, 1)),
+                          ('fc3', nn.Linear(512, 1))
                           ]))
 
     def forward(self, x):

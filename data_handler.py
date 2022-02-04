@@ -1,10 +1,11 @@
 import os
+from wsgiref.handlers import format_date_time
 from torch.utils.data import Dataset, DataLoader, Subset
-from torchvision.io import read_image
-from torchvision.transforms import ToTensor
+from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 
 import PIL
 import numpy as np
+import matplotlib.pyplot as plt
 
 class DogsVsCatsDataset(Dataset):
     """
@@ -66,10 +67,27 @@ class ValSplit():
 
 
 if __name__ == "__main__":
+    
 
-    dataset = DogsVsCatsDataset("data/train/", transform = ToTensor())
+    transform = Compose([Resize((224, 224)),
+                                ToTensor(),
+                                ])
+
+    dataset = DogsVsCatsDataset("data/train/", transform = transform)
 
     val_split = ValSplit(0.1)
-    train_loader, val_loader = val_split.get_train_val_loader(dataset, 4)
+    train_loader, val_loader = val_split.get_train_val_loader(dataset, 1)
 
-    print(len(train_loader), len(val_loader))
+    x, y = next(iter(train_loader))
+
+    plt.imshow(x[0, :, :, :].permute(1, 2, 0))
+    plt.savefig("test_train.png")
+
+    print(y)
+
+    x, y = next(iter(val_loader))
+
+    plt.imshow(x[0, :, :, :].permute(1, 2, 0))
+    plt.savefig("test_val.png")
+
+    print(y)

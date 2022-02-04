@@ -20,7 +20,7 @@ def get_parser():
                         help="Batch size.")
 
     # Training
-    parser.add_argument("-lr", "--lr", default=0.01, type=float,
+    parser.add_argument("-lr", "--lr", default=1e-3, type=float,
                         help="Learning rate for optimizer.")
 
     parser.add_argument("-wd", "--weight_decay", default=0, type=float,
@@ -43,7 +43,7 @@ def get_parser():
                         help="Number of iterations between displaying steps.")
 
     # Model saving
-    parser.add_argument("-p", "--model_path", default="model.pth", type=int,
+    parser.add_argument("-p", "--model_path", default="model.pth", type=str,
                         help="Model path for saving.")
 
     return parser

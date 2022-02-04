@@ -1,6 +1,7 @@
 from utils import AverageMeter
 from sklearn.metrics import accuracy_score
 import torch
+import numpy as np
 
 class TrainingSession:
 
@@ -10,7 +11,8 @@ class TrainingSession:
 
     def __init__(self, model, train_loader, val_loader,
                  optimizer, epochs, device,
-                 writer, display_ratio):
+                 writer, display_ratio,
+                 model_path):
 
         self.model = model
         self.train_loader = train_loader
@@ -23,6 +25,7 @@ class TrainingSession:
         self.writer = writer
 
         self.display_ratio = display_ratio
+        self.model_path = model_path
 
     def train_one_epoch(self, criterion, epoch):
 
@@ -63,8 +66,8 @@ class TrainingSession:
             if i % self.display_ratio == 0:
                 print(f"Epoch: [{epoch}][{i}/{len(self.train_loader)}]")
 
-            self.writer.add_scalar("Loss Train [AVG]", losses.avg, epoch)
-            self.writer.flush()
+            # self.writer.add_scalar("Loss Train [AVG]", losses.avg, epoch)
+            # self.writer.flush()
 
         return losses.avg
 
@@ -74,6 +77,8 @@ class TrainingSession:
         accuracies = AverageMeter()
 
         self.model.eval()
+
+        val_loss_min = np.inf
 
         with torch.no_grad():
 
@@ -99,12 +104,20 @@ class TrainingSession:
                 if i % self.display_ratio == 0:
                     print(f'Val: [{i}/{len(self.val_loader)}]')
 
-        self.writer.add_scalar("Loss Val [AVG]", losses.avg, epoch)
-        self.writer.add_scalar("Accuracy Val [AVG]", accuracies.avg, epoch)
+            # save model if validation loss has decreased
+            val_loss = losses.avg
 
-        self.writer.flush()
+            if val_loss <= val_loss_min:
+                print(f'Val loss decreased ({val_loss_min} --> {val_loss}).  Saving model ...')
+                torch.save(self.model.state_dict(), 'model.pth')
+                val_loss_min = val_loss
 
-        return accuracies.avg, losses.avg
+        # self.writer.add_scalar("Loss Val [AVG]", val_loss, epoch)
+        # self.writer.add_scalar("Accuracy Val [AVG]", accuracies.avg, epoch)
+
+        # self.writer.flush()
+
+        return accuracies.avg, val_loss
 
     def run_train(self):
 

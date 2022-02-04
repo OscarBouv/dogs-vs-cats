@@ -59,6 +59,7 @@ def main(args):
                                        device=device,
                                        writer=writer,
                                        display_ratio=args.display_ratio,
+                                       model_path=args.model_path
                                        )
 
     training_session.run_train()

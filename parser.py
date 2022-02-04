@@ -36,11 +36,14 @@ def get_parser():
                         help="Number of epochs during training.")
 
     # Display
-
     parser.add_argument("-d", "--display", default=True, type=bool,
                         help="Option to display training informations.")
 
     parser.add_argument("-dr", "--display_ratio", default=50, type=int,
                         help="Number of iterations between displaying steps.")
+
+    # Model saving
+    parser.add_argument("-p", "--model_path", default="model.pth", type=int,
+                        help="Model path for saving.")
 
     return parser

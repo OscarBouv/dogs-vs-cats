@@ -93,8 +93,6 @@ class TrainingSession:
                 y_pred = (output > 0)
                 accuracy = accuracy_score(y_pred.cpu().numpy(), y_val.cpu().numpy())
 
-                print(accuracy)
-
                 losses.update(loss.item(), x_val.size(0))
                 accuracies.update(accuracy.item(), x_val.size(0))
 

@@ -1,12 +1,8 @@
 import os
-from matplotlib import transforms
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, Subset
 from torchvision.io import read_image
 from torchvision.transforms import ToTensor
-import torch
 
-import numpy as np
-import matplotlib.pyplot as plt
 import PIL
 
 class DogsVsCatsDataset(Dataset):
@@ -29,11 +25,7 @@ class DogsVsCatsDataset(Dataset):
         img_path = os.path.join(self.img_dir, file_name)
 
         image = PIL.Image.open(img_path)
-        image = image.resize(self.image_size)
-
-
-        #image = read_image(img_path)
-        #image = Resize(self.image_size)(image)
+        #image = image.resize(self.image_size)
 
         label = int(file_name.split(".")[0] == "dog")
 
@@ -41,6 +33,35 @@ class DogsVsCatsDataset(Dataset):
             image = self.transform(image)
 
         return image, label
+
+class ValSplitLoader():
+
+    def __init__(self, dataset):
+        self.dataset = dataset
+
+    def get_train_val_loader(self, batch_size, validation_split):
+
+        indices = np.arange(len(self.dataset))
+        np.random.shuffle(indices)
+
+        train_indices = indices[0:validation_split * len(self.dataset)]
+        val_indices = indices[validation_split * len(self.dataset):]
+
+        train_loader = DataLoader(Subset(self.dataset, train_indices),
+                                  batch_size=batch_size,
+                                  shuffle=True)
+
+        val_loader = Subset(self.dataset, val_indices)
+
+        return train_loader, val_loader
+
+
+
+
+
+
+        
+
 
 # class DogsVsCatLoader():
 

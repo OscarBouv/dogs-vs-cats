@@ -10,10 +10,9 @@ class DogsVsCatsDataset(Dataset):
         Documentation #TODO
     """
 
-    def __init__(self, img_dir, image_size=(80, 80), transform=None):
+    def __init__(self, img_dir, transform=None):
 
         self.img_dir = img_dir
-        self.image_size=image_size
         self.transform = transform
 
     def __len__(self):
@@ -25,8 +24,6 @@ class DogsVsCatsDataset(Dataset):
         img_path = os.path.join(self.img_dir, file_name)
 
         image = PIL.Image.open(img_path)
-        #image = image.resize(self.image_size)
-
         label = int(file_name.split(".")[0] == "dog")
 
         if self.transform:

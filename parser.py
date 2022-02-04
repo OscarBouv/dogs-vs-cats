@@ -6,7 +6,6 @@ def get_parser():
     parser = argparse.ArgumentParser("", description="Model training")
 
     # Data
-
     parser.add_argument("-i", "--image_size", default=80, type=int,
                         help="Input image input size.")
 

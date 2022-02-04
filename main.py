@@ -4,17 +4,22 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 
 from data_handler import DogsVsCatsDataset
-from model import BaseCNN
+from model import BaseCNN, PretrainedVGG19
 from train import TrainingSession
 
 from parser import get_parser
+
 
 def main(args):
     """
         Documentation #TODO
     """
 
-    model = BaseCNN()
+    if args.conv_net == "basecnn":
+        model = BaseCNN()
+
+    elif args.conv_net == "vgg":
+        model = PretrainedVGG19()
 
     train_transforms = Compose([Resize((args.image_size, args.image_size)),
                                 ToTensor(),

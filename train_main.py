@@ -2,11 +2,11 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 
-from data_handler import DogsVsCatsDataset, ValSplit
+from dataset import DogsVsCatsDataset, ValSplit
 from models import BaseCNN, PretrainedVGG19
 from train import TrainingSession
 
-from train_parser import get_parser
+from parsers.train_parser import get_parser
 
 
 def main(args):

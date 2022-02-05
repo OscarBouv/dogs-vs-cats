@@ -2,7 +2,6 @@ from utils import AverageMeter
 from sklearn.metrics import accuracy_score
 import torch
 import numpy as np
-import dill as dill
 class TrainingSession:
 
     """
@@ -54,7 +53,7 @@ class TrainingSession:
 
             y_pred = self.model(x)
 
-            loss = criterion(y_pred, y)
+            loss = criterion(y_pred, y.view(-1, 1).to(torch.float32))
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -105,7 +104,7 @@ class TrainingSession:
 
             if val_loss <= val_loss_min:
                 print(f'Val loss decreased ({val_loss_min} --> {val_loss}).  Saving model ...')
-                torch.save(self.model.state_dict(), 'model.pth', pickle=dill)
+                torch.save(self.model.state_dict(), self.model_path)
                 val_loss_min = val_loss
 
         return accuracies.avg, val_loss, val_loss_min
@@ -128,7 +127,7 @@ class TrainingSession:
             print('Loss/train', trainloss, epoch)
 
             # evaluate on validation set
-            val_acc, val_loss, val_loss_min = self.validate(criterion, epoch, val_loss_min)
+            val_acc, val_loss, val_loss_min = self.validate(criterion, val_loss_min)
 
             print(f'Acc/valid at epoch {epoch} : {val_acc}')
             print(f'Loss/valid at epoch {epoch} : {val_loss}')

@@ -8,7 +8,7 @@ Implementation of dogs-vs-cats classifier inspired by Kaggle competition (link)
 Archiver command : 
 
 ```bash
-torch-model-archiver --model-name vgg --version 1.0 --serialized-file models/model_vgg.pth --extra-files models/index_to_name.json --handler models/handler.py --export-path serve/model-store -f
+torch-model-archiver --model-name vgg --version 1.0 --model-file models/vgg.py --serialized-file models/model_vgg.pth --extra-files models/index_to_name.json --handler models/handler.py --export-path serve/model-store -f
 ```
 
 Server command : 

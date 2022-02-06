@@ -1,6 +1,4 @@
 from torch import nn
-import torch
-from torchvision import models
 from collections import OrderedDict
 
 
@@ -38,7 +36,7 @@ class BaseCNN(nn.Module):
                           ('relu', nn.ReLU())
         ]))
 
-        self.fc2 = nn.Linear(64, 1)
+        self.fc2 = nn.Linear(64, 2)
 
     def forward(self, x):
 
@@ -49,10 +47,3 @@ class BaseCNN(nn.Module):
         x = self.fc2(x)
 
         return x
-
-if __name__ == "__main__":
-
-    # Testing BaseCCN with image shape (80, 80, 3)
-    x = torch.randn(50, 3, 80, 80)
-    model = BaseCNN()
-    print(model(x).shape)

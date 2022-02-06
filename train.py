@@ -53,7 +53,7 @@ class TrainingSession:
 
             y_pred = self.model(x)
 
-            loss = criterion(y_pred, y.view(-1, 1).to(torch.float32))
+            loss = criterion(y_pred, y)
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -87,13 +87,15 @@ class TrainingSession:
 
                 # compute output
                 output = self.model(x_val)
-                loss = criterion(output, y_val.view(-1, 1).to(torch.float32))
+                loss = criterion(output, y_val)
 
                 output = output.float()
                 loss = loss.float()
 
                 # measure accuracy and record loss
-                y_pred = (output > 0)
+                y_pred = torch.argmax(output.data, axis=1)
+                y_val = torch.argmax(y_val, axis=1)
+
                 accuracy = accuracy_score(y_pred.cpu().numpy(), y_val.cpu().numpy())
 
                 losses.update(loss.item(), x_val.size(0))
@@ -122,7 +124,7 @@ class TrainingSession:
         self.model.to(self.device)
 
         # criterion
-        criterion = torch.nn.BCEWithLogitsLoss().to(self.device)
+        criterion = torch.nn.CrossEntropyLoss().to(self.device)
 
         val_loss_min = np.inf
 

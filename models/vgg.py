@@ -1,5 +1,4 @@
 from torch import nn
-import torch
 from torchvision import models
 from collections import OrderedDict
 
@@ -19,7 +18,7 @@ class PretrainedVGG19(nn.Module):
                           ('fc2', nn.Linear(1028, 512)),
                           ('relu2', nn.ReLU()),
                           ('dropout2', nn.Dropout(0.5)),
-                          ('fc3', nn.Linear(512, 1))
+                          ('fc3', nn.Linear(512, 2))
                           ]))
 
     def forward(self, x):
@@ -27,11 +26,3 @@ class PretrainedVGG19(nn.Module):
         x = self.pretrained_model(x)
 
         return x
-
-
-if __name__ == "__main__":
-
-    # Testing PretrainedVGG19 image shape (224, 224, 3)
-    x = torch.randn(50, 3, 224, 224)
-    model = PretrainedVGG19()
-    print(model(x).shape)

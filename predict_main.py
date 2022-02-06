@@ -1,5 +1,6 @@
 import torch
-from models import PretrainedVGG19
+from models.vgg import PretrainedVGG19
+from models.base_cnn import BaseCNN
 import os
 import PIL
 
@@ -21,7 +22,6 @@ def predict(output, classes):
 def main(args):
 
     file_name = os.listdir(args.directory_path)[args.img_idx]
-
     IMG_PATH = os.path.join(args.directory_path, file_name)
 
     img = PIL.Image.open(IMG_PATH)
@@ -33,7 +33,7 @@ def main(args):
 
     input = torch.unsqueeze(transform(img), dim=0)
 
-    MODEL_PATH = os.path.join("./model_dir/", args.model_path)
+    MODEL_PATH = os.path.join(args.model_path)
 
     model = PretrainedVGG19()
     model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))

@@ -3,7 +3,8 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 
 from dataset import DogsVsCatsDataset, ValSplit
-from models import BaseCNN, PretrainedVGG19
+from models.base_cnn import BaseCNN
+from models.vgg import PretrainedVGG19
 from train import TrainingSession
 
 from parsers.train_parser import get_parser

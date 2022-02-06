@@ -1,5 +1,4 @@
 import os
-from wsgiref.handlers import format_date_time
 from torch.utils.data import Dataset, DataLoader, Subset
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 

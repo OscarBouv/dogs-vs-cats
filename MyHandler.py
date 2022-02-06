@@ -1,7 +1,5 @@
 import torch
-import io
-from PIL import Image
-from torchvision import transforms
+from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 from ts.torch_handler.base_handler import BaseHandler
 
 
@@ -12,16 +10,14 @@ class MyHandler(BaseHandler):
     https://pytorch.org/serve/custom_service.html
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
 
         super().__init__()
 
-        self.transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                 std=[0.229, 0.224, 0.225])
-        ])
+        self.transform = Compose([Resize((224, 224)),
+                                  ToTensor(),
+                                  Normalize((0.485, 0.456, 0.406),
+                                            (0.229, 0.224, 0.225))])
 
     def preprocess_one_image(self, req):
         """
@@ -33,10 +29,10 @@ class MyHandler(BaseHandler):
             image = req.get("body")
 
         # create a stream from the encoded image
-        image = Image.open(io.BytesIO(image))
         image = self.transform(image)
         # add batch dim
         image = image.unsqueeze(0)
+
         return image
 
     def preprocess(self, requests):
@@ -54,10 +50,10 @@ class MyHandler(BaseHandler):
         """
         output = self.model(x)
         probs = torch.sigmoid(output)
-        preds = (probs > 0)
-        return preds
 
-    def postprocess(self, preds):
+        return probs
+
+    def postprocess(self, probs):
         """
         Given the data from .inference, postprocess the output.
         In our case, we get the human readable label from the mapping 
@@ -67,9 +63,17 @@ class MyHandler(BaseHandler):
         res = []
         # pres has size [BATCH_SIZE, 1]
         # convert it to list
+
+        preds = (probs > 0.5).to(int)
         preds = preds.cpu().tolist()
-        for pred in preds:
-            label = self.mapping[str(pred)][1]
-            res.append({'label' : label, 'index': pred })
+
+        for i in range(len(preds)):
+            pred, prob = preds[i][0], float(probs[i][0])
+
+            if pred == 0:
+                prob = 1. - prob
+
+            label = self.mapping[str(pred)]
+            res.append({'label' : label, 'probability': prob})
 
         return res

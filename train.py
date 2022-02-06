@@ -38,7 +38,7 @@ class TrainingSession:
 
         Returns
         -------
-        self : average losses of training epoch.
+        losses.avg : average losses computed during training epoch.
 
         """
 
@@ -65,10 +65,13 @@ class TrainingSession:
             if i % self.display_ratio == 0:
                 print(f"Epoch: [{epoch}][{i}/{len(self.train_loader)}]")
 
-
         return losses.avg
 
     def validate(self, criterion, val_loss_min):
+
+        """
+            Documentation #TODO
+        """
 
         losses = AverageMeter()
         accuracies = AverageMeter()
@@ -110,6 +113,10 @@ class TrainingSession:
         return accuracies.avg, val_loss, val_loss_min
 
     def run_train(self):
+
+        """
+            Documentation #TODO
+        """
 
         # load self.model
         self.model.to(self.device)

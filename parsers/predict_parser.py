@@ -21,7 +21,7 @@ def get_parser():
                         help="Input image size.")
 
     # Model loading
-    parser.add_argument("-p", "--model_path", default="model_vgg.pth",
+    parser.add_argument("-p", "--model_path", default="./model_store/model_vgg.pth",
                         type=str, help="Model path for loading.")
 
     return parser

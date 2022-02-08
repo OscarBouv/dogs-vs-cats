@@ -104,14 +104,19 @@ docker run --rm --name torchserve_docker \
 
 ### Inference
 
-Inference command :
+For example to infer the label of the following image, stored in [/data/test1/2124.jpg](/data/test1/2124.jpg), run the following command : 
+
+![Example inference image](./data/test1/2124.jpg)
 
 ```bash
-curl -X POST http://localhost:8080/predictions/vgg -T dogs-vs-cats/data/test1/1.jpg
+curl -X POST http://localhost:8080/predictions/vgg -T dogs-vs-cats/data/test1/2124.jpg
 ```
 
-
-
-
-
-
+This should output the following answer :
+ 
+ `
+{
+  "dog": 0.9533627033233643
+}
+`
+where label and probability is written in a JSON file.

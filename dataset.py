@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 class DogsVsCatsDataset(Dataset):
     """
-        Documentation #TODO
+        Class to handle special case of dataset loading for dogs-vs-cats data.
     """
 
     def __init__(self, img_dir, transform=None):
@@ -24,7 +24,10 @@ class DogsVsCatsDataset(Dataset):
         file_name = os.listdir(self.img_dir)[idx]
         img_path = os.path.join(self.img_dir, file_name)
 
+        # load image
         image = PIL.Image.open(img_path)
+
+        # If
         label = int(file_name.split(".")[0] == "dog")
 
         if self.transform:
@@ -34,12 +37,20 @@ class DogsVsCatsDataset(Dataset):
 
 class ValSplit():
 
+    """
+        Validation split class. Random split.
+    """
+
     def __init__(self, validation_split):
         self.validation_split = validation_split
 
     def get_train_val_loader(self, dataset, batch_size=32):
+        """
+            Return train and validation dataloaders for training.
+        """
 
         if self.validation_split > 0:
+
             indices = np.arange(0, len(dataset), dtype=int)
             np.random.shuffle(indices)
 
@@ -57,7 +68,7 @@ class ValSplit():
             return train_loader, val_loader
 
         else:
-
+            #No split
             train_loader = DataLoader(dataset,
                                       batch_size=batch_size,
                                       shuffle=True)
@@ -71,7 +82,7 @@ if __name__ == "__main__":
                          ToTensor()
                          ])
 
-    dataset = DogsVsCatsDataset("data/train/", transform = transform)
+    dataset = DogsVsCatsDataset("data/train/", transform=transform)
 
     val_split = ValSplit(0.1)
     train_loader, val_loader = val_split.get_train_val_loader(dataset, 1)

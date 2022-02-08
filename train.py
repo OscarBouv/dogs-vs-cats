@@ -143,6 +143,8 @@ class TrainingSession:
 
         #self.writer.close()
 
+        print("End of training.")
+
 
 if __name__ == "__main__":
     pass

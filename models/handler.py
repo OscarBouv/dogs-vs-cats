@@ -1,5 +1,5 @@
-from ts.torch_handler.image_classifier import ImageClassifier as ImgClsfr
+from ts.torch_handler.image_classifier import ImageClassifier
 
 
-class PretrainedVGG19(ImgClsfr):
-    topk=1
+class PretrainedVGG19(ImageClassifier):
+    topk = 1

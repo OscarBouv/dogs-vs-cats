@@ -4,11 +4,22 @@ We are aiming to implement with Pytorch Dog vs Cat classifier and provide comman
 
 ## Repository Structure
 
-[models](./models) contains all necessary files for defining models, saved models, and a handler file used for serving.
+[models/](./models) contains all necessary files for defining models, saved models, and a handler file used for serving.
 
-[parsers](./parsers) contains parsers for both training and prediction Python scripts.
+[parsers/](./parsers) contains parsers for both training and prediction Python scripts.
 
-[serve](./serve) contains necessary files for model serving using Torchserve and Docker.
+[serve/](./serve) contains necessary files for model serving using Torchserve and Docker.
+
+
+## Install required packages
+
+All packages neeeded for running following commands are listed in `requirements.txt`
+
+```bash
+pip install requirements.txt
+```
+
+
 
 ## Dataset
 
@@ -49,6 +60,8 @@ During training, at each epoch, if validation loss decreases, model state dictio
 
 ## Server
 
+### Using Torchserve
+
 Archiver command : 
 
 ```bash
@@ -71,8 +84,34 @@ Server command :
 torchserve --start --ncs --ts-config serve/config.properties --model-store serve/model-store --models vgg=vgg.mar
 ```
 
+### Using Docker
+
+Build ubuntu-torchserve image, using files defined in [serve/](./serve)
+
+```bash
+docker build -t ubuntu-torchserve:latest deployment/
+```
+Definition of latest
+
+Launch server
+
+```bash
+docker run --rm --name torchserve_docker \
+           -p8080:8080 -p8081:8081 -p8082:8082 \
+           ubuntu-torchserve:latest \
+           torchserve --model-store /home/model-server/model-store/ --models vgg=vgg.mar
+```
+
+### Inference
+
 Inference command :
 
 ```bash
 curl -X POST http://localhost:8080/predictions/vgg -T dogs-vs-cats/data/test1/1.jpg
 ```
+
+
+
+
+
+

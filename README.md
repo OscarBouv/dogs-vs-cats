@@ -4,11 +4,22 @@ We are aiming to implement with Pytorch Dog vs Cat classifier and provide comman
 
 ## Repository Structure
 
-[models](./models) contains all necessary files for defining models, saved models, and a handler file used for serving.
+[models/](./models) contains all necessary files for defining models, saved models, and a handler file used for serving.
 
-[parsers](./parsers) contains parsers for both training and prediction Python scripts.
+[parsers/](./parsers) contains parsers for both training and prediction Python scripts.
 
-[serve](./serve) contains necessary files for model serving using Torchserve and Docker.
+[serve/](./serve) contains necessary files for model serving using Torchserve and Docker.
+
+
+## Install required packages
+
+All packages neeeded for running following commands are listed in `requirements.txt`
+
+```bash
+pip install requirements.txt
+```
+
+
 
 ## Dataset
 
@@ -49,6 +60,8 @@ During training, at each epoch, if validation loss decreases, model state dictio
 
 ## Server
 
+### Using Torchserve
+
 Archiver command : 
 
 ```bash
@@ -71,8 +84,39 @@ Server command :
 torchserve --start --ncs --ts-config serve/config.properties --model-store serve/model-store --models vgg=vgg.mar
 ```
 
-Inference command :
+### Using Docker
+
+Build ubuntu-torchserve image, using files defined in [serve/](./serve)
 
 ```bash
-curl -X POST http://localhost:8080/predictions/vgg -T dogs-vs-cats/data/test1/1.jpg
+docker build -t ubuntu-torchserve:latest deployment/
 ```
+Definition of latest
+
+Launch server
+
+```bash
+docker run --rm --name torchserve_docker \
+           -p8080:8080 -p8081:8081 -p8082:8082 \
+           ubuntu-torchserve:latest \
+           torchserve --model-store /home/model-server/model-store/ --models vgg=vgg.mar
+```
+
+### Inference
+
+For example to infer the label of the following image, stored in [/data/test1/2124.jpg](/data/test1/2124.jpg), run the following command : 
+
+![Example inference image](./data/test1/2124.jpg)
+
+```bash
+curl -X POST http://localhost:8080/predictions/vgg -T dogs-vs-cats/data/test1/2124.jpg
+```
+
+This should output the following answer :
+ 
+ `
+{
+  "dog": 0.9533627033233643
+}
+`
+where label and probability is written in a JSON file.

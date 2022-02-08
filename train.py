@@ -1,16 +1,16 @@
 from utils import AverageMeter
-from sklearn.metrics import accuracy_score
 import torch
 import numpy as np
+from tqdm import tqdm
+
 class TrainingSession:
 
     """
-        Documentation #TODO
+        Class for running training session.
     """
 
     def __init__(self, model, train_loader, val_loader,
                  optimizer, epochs, device,
-                 writer, display_ratio,
                  model_path):
 
         self.model = model
@@ -21,56 +21,53 @@ class TrainingSession:
         self.epochs = epochs
 
         self.device = device
-        self.writer = writer
 
-        self.display_ratio = display_ratio
         self.model_path = model_path
 
-    def train_one_epoch(self, criterion, epoch):
+    def train_one_epoch(self, criterion):
 
-        """Training procedure for one epoch.
-
-        Parameters
-        ----------
-        criterion : loss criterion for optimization procedure.
-
-        epoch : index of single epoch training procedure.
-
-        Returns
-        -------
-        losses.avg : average losses computed during training epoch.
-
+        """
+            Training procedure for one epoch.
         """
 
         losses = AverageMeter()
+        acc = AverageMeter()
+
         self.model.train()
 
-        for i, (x, y) in enumerate(self.train_loader):
+        with tqdm(self.train_loader, unit="batch") as tepoch:
 
-            # SUPERVISED
-            x = x.to(self.device)
-            y = y.to(self.device)
+            for (x, y) in tepoch:
 
-            y_pred = self.model(x)
+                # SUPERVISED TRAIN EPOCH
+                x = x.to(self.device)
+                y = y.to(self.device)
 
-            loss = criterion(y_pred, y)
+                output = self.model(x)
 
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
+                loss = criterion(output, y)
 
-            # measure record loss
-            losses.update(loss.item(), x.size(0))
+                # Compute accuracy
+                y_pred = output.argmax(dim=1, keepdim=True).squeeze()
+                accuracy = (y_pred == y).sum().item() / x.size(0)
 
-            if i % self.display_ratio == 0:
-                print(f"Epoch: [{epoch}][{i}/{len(self.train_loader)}]")
+                # measure record loss and accuracies
+                losses.update(loss.item(), x.size(0))
+                acc.update(accuracy, x.size(0))
 
-        return losses.avg
+                # Update progress bar with average train loss and accuracy
+                tepoch.set_postfix(train_loss=losses.avg, train_acc=acc.avg)
+
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+            return losses.avg
 
     def validate(self, criterion, val_loss_min):
 
         """
-            Documentation #TODO
+            Compute loss and accuracy on validation set.
         """
 
         losses = AverageMeter()
@@ -80,68 +77,66 @@ class TrainingSession:
 
         with torch.no_grad():
 
-            for i, (x_val, y_val) in enumerate(self.val_loader):
+            with tqdm(self.val_loader, unit="batch") as tepoch:
 
-                x_val = x_val.to(self.device)
-                y_val = y_val.to(self.device)
+                for (x_val, y_val) in tepoch:
 
-                # compute output
-                output = self.model(x_val)
-                loss = criterion(output, y_val)
+                    x_val = x_val.to(self.device)
+                    y_val = y_val.to(self.device)
 
-                output = output.float()
-                loss = loss.float()
+                    # compute output
+                    output = self.model(x_val)
+                    loss = criterion(output, y_val)
 
-                # measure accuracy and record loss
-                y_pred = torch.argmax(output.data, axis=1)
-                y_val = torch.argmax(y_val, axis=1)
+                    output = output.float()
+                    loss = loss.float()
 
-                accuracy = accuracy_score(y_pred.cpu().numpy(), y_val.cpu().numpy())
+                    # measure accuracy and record loss
+                    y_pred = output.argmax(dim=1, keepdim=True).squeeze()
+                    accuracy = (y_pred == y_val).sum().item() / x_val.size(0)
 
-                losses.update(loss.item(), x_val.size(0))
-                accuracies.update(accuracy.item(), x_val.size(0))
+                    losses.update(loss.item(), x_val.size(0))
+                    accuracies.update(accuracy, x_val.size(0))
 
-                if i % self.display_ratio == 0:
-                    print(f'Val: [{i}/{len(self.val_loader)}]')
+                val_loss = losses.avg
 
-            # save model if validation loss has decreased
-            val_loss = losses.avg
+                if val_loss <= val_loss_min:
 
-            if val_loss <= val_loss_min:
-                print(f'Val loss decreased ({val_loss_min} --> {val_loss}).  Saving model ...')
-                torch.save(self.model.state_dict(), self.model_path)
-                val_loss_min = val_loss
+                    # Save model
+                    print(f'Val loss decreased {val_loss_min} --> {val_loss}.')
+                    print(f'Saving model at {self.model_path}.')
+                    torch.save(self.model.state_dict(), self.model_path)
+
+                    # Update min validation loss
+                    val_loss_min = val_loss
 
         return accuracies.avg, val_loss, val_loss_min
 
-    def run_train(self):
+    def run(self):
 
         """
-            Documentation #TODO
+            Run training session.
         """
 
-        # load self.model
+        # Load self.model
         self.model.to(self.device)
 
-        # criterion
+        # Criterion
         criterion = torch.nn.CrossEntropyLoss().to(self.device)
 
+        # Initialize min validation loss
         val_loss_min = np.inf
 
         # Supervised train loop
         for epoch in range(self.epochs):
 
-            trainloss = self.train_one_epoch(criterion, epoch)
+            self.train_one_epoch(criterion)
 
-            print('Loss/train', trainloss, epoch)
-
-            # evaluate on validation set
+            # Evaluate on validation set
             val_acc, val_loss, val_loss_min = self.validate(criterion, val_loss_min)
 
             print(f'Acc/valid at epoch {epoch} : {val_acc}')
             print(f'Loss/valid at epoch {epoch} : {val_loss}')
-
-        #self.writer.close()
 
         print("End of training.")
 

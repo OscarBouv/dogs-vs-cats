@@ -10,8 +10,12 @@ from parsers.predict_parser import get_parser
 
 def predict(output, classes):
 
-    if len(output) > 1:
-        y_pred = torch.argmax(output, dim=1)
+    """
+        Outputs label given model output and classes dict.
+    """
+
+    if output.size()[1] > 1:
+        y_pred = output.argmax(dim=1, keepdim=True).item()
 
     else:
         y_pred = int(output > 0)
@@ -21,12 +25,18 @@ def predict(output, classes):
 
 def main(args):
 
-    file_name = os.listdir(args.directory_path)[args.img_idx]
-    IMG_PATH = os.path.join(args.directory_path, file_name)
+    """
+       Main function for showing and predicting image label.
 
-    img = PIL.Image.open(IMG_PATH)
+       -------
+       Parameters
 
-    transform = Compose([Resize((args.image_size, args.image_size)),
+       args : parsed arguments from predict_parser.
+    """
+
+    img = PIL.Image.open(args.img_path)
+
+    transform = Compose([Resize((224, 224)),
                          ToTensor(),
                          Normalize((0.485, 0.456, 0.406),
                                    (0.229, 0.224, 0.225))])
@@ -35,12 +45,16 @@ def main(args):
 
     MODEL_PATH = os.path.join(args.model_path)
 
-    model = PretrainedVGG19()
-    model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
+    if args.conv_net == "base_cnn":
+        model = BaseCNN()
+        model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
+
+    if args.conv_net == "vgg":
+        model = PretrainedVGG19()
 
     model.eval()
 
-    classes = ["cat", "dog"]
+    classes = {0: "cat", 1: "dog"}
     output = model(input)
 
     pred = predict(output, classes)
@@ -52,6 +66,5 @@ def main(args):
 if __name__ == "__main__":
 
     args = get_parser().parse_args()
-
     main(args)
 

@@ -1,5 +1,4 @@
 import torch
-from torch.utils.tensorboard import SummaryWriter
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 
 from dataset import DogsVsCatsDataset, ValSplit
@@ -12,50 +11,61 @@ from parsers.train_parser import get_parser
 
 def main(args):
     """
-        Documentation #TODO
+        Main function to run training session.
+
+        ------
+        Parameters
+
+        args : parsed arguments from train_parser
     """
 
+    # Load model
     if args.conv_net == "base_cnn":
-        model = BaseCNN()
+        model = BaseCNN(args.dropout)
 
     elif args.conv_net == "vgg":
-        model = PretrainedVGG19()
+        model = PretrainedVGG19(args.dropout)
 
-    train_transforms = Compose([Resize((args.image_size, args.image_size)),
+    # Define train transform
+    train_transforms = Compose([Resize((224, 224)),
                                 ToTensor(),
                                 Normalize((0.485, 0.456, 0.406),
                                           (0.229, 0.224, 0.225))])
 
-
+    #Load dataset
     train_dataset = DogsVsCatsDataset("data/train/", transform=train_transforms)
 
-    print("Downloaded dataset done.")
+    print("Dataset loaded.")
 
+    # Define validation split
     val_split = ValSplit(args.validation_split)
+
+    # Define training and valid loader
     train_loader, val_loader = val_split.get_train_val_loader(train_dataset, args.batch_size)
 
+    #Define optimizer
     optimizer = torch.optim.Adam(model.parameters(),
                                  lr=args.lr,
                                  weight_decay=args.weight_decay,
-                                 betas=(0.9, 0.999))
+                                 betas=args.betas)
 
+    # Define device (cuda if available)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    writer = SummaryWriter()
 
     print(f"Running training session on {device} ...")
 
+    # Define training session
     training_session = TrainingSession(model=model,
                                        train_loader=train_loader,
                                        val_loader=val_loader,
                                        optimizer=optimizer,
                                        epochs=args.epochs,
                                        device=device,
-                                       writer=writer,
-                                       display_ratio=args.display_ratio,
                                        model_path=args.model_path
                                        )
 
-    training_session.run_train()
+    # Run session
+    training_session.run()
 
 
 if __name__ == "__main__":

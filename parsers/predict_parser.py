@@ -5,23 +5,21 @@ import numpy as np
 def get_parser():
 
     """
-        Documentation #TODO
+        Outputs argument parser for predict_main script.
     """
 
     parser = argparse.ArgumentParser("", description="Model predict.")
 
+    # Model
+    parser.add_argument("-cn", "--conv_net", default="vgg", type=str,
+                        help="Trained convnet classifier used for prediction.")
+
     # Data
-    parser.add_argument("-d", "--directory_path", default="./data/test1/",
-                        type=str, help="Image directory path.")
-
-    parser.add_argument("-idx", "--img_idx", default=np.random.randint(1000),
-                        type=int, help="Index image in directory to predict")
-
-    parser.add_argument("-i", "--image_size", default=224, type=int,
-                        help="Input image size.")
+    parser.add_argument("-i", "--img_path", default="./data/test1/1.jpg",
+                        type=str, help="Image to predict directory path.")
 
     # Model loading
-    parser.add_argument("-p", "--model_path", default="./model_store/model_vgg.pth",
+    parser.add_argument("-p", "--model_path", default="./models/model_vgg.pth",
                         type=str, help="Model path for loading.")
 
     return parser

@@ -26,7 +26,7 @@ All the command lines listed must be run from root of project.
 All packages neeeded for running following commands are listed in `requirements.txt`
 
 ```bash
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Dataset

@@ -63,7 +63,7 @@ To run same training procedure that generated saved model `model_base_cnn.pth`, 
 ```bash
 python train_main.py --conv_net base_cnn --dropout 0.2 --batch_size 32 \
                      --validation_split 0.1 --lr 1e-3 \
-                     --weight_decay 0 --betas 0.9, 0.999 --epochs 10 \
+                     --weight_decay 0 --betas 0.9 0.999 --epochs 10 \
                      --model_path models/base_cnn/model_base_cnn.pth
 ```
 

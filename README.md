@@ -74,10 +74,10 @@ After 3 epochs, the Pretrained VGG model converges and reaches an accuracy of ar
 To run same training procedure that generated saved model `model_vgg.pth`, run the following command :
 
 ```bash
-python train_main.py --conv_net vgg --dropout 0.5 --batch_size 32
-                     --validation_split 0.1 --lr 1e-3
-                     --weight_decay 0 --betas 0.9 0.999 --epochs 3
-                     --model_path models/vgg/model_vgg.pth 
+python train_main.py --conv_net vgg --dropout 0.5 --batch_size 32 \
+                     --validation_split 0.1 --lr 1e-3 \
+                     --weight_decay 0 --betas 0.9 0.999 --epochs 3 \
+                     --model_path models/vgg/model_vgg.pth \
 ```
 
 Train flags stands for:
@@ -186,9 +186,9 @@ docker pull pytorch/torchserve
 To launch docker server container, you can use the following command line :
 
 ```bash
-docker run --rm -p8080:8080 -p 8081:8081 -p8082:8082 --name torchserve_docker\
+docker run --rm -p8080:8080 -p 8081:8081 -p8082:8082 --name torchserve_docker \
            -v $(pwd)/deployment/model-store:/home/model-server/model-store \
-           pytorch/torchserve:latest
+           pytorch/torchserve:latest \
            torchserve --model-store /home/model-server/model-store/ --models base_cnn.mar vgg=vgg.mar 
 ```
 where `-v` argument is used to copy the `model-store` directory located in `./deployment` in docker image.

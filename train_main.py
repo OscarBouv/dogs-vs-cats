@@ -2,8 +2,8 @@ import torch
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 
 from dataset import DogsVsCatsDataset, ValSplit
-from models.base_cnn import BaseCNN
-from models.vgg import PretrainedVGG19
+from models.base_cnn.base_cnn import BaseCNN
+from models.vgg.vgg import PretrainedVGG19
 from train import TrainingSession
 
 from parsers.train_parser import get_parser
@@ -21,9 +21,11 @@ def main(args):
 
     # Load model
     if args.conv_net == "base_cnn":
+        print("Use Base CNN model.")
         model = BaseCNN(args.dropout)
 
     elif args.conv_net == "vgg":
+        print("Use Pretrained VGG model.")
         model = PretrainedVGG19(args.dropout)
 
     # Define train transform

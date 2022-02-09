@@ -3,6 +3,7 @@ import torch
 import numpy as np
 from tqdm import tqdm
 
+
 class TrainingSession:
 
     """
@@ -28,6 +29,11 @@ class TrainingSession:
 
         """
             Training procedure for one epoch.
+
+        ------
+        Parameter
+
+        criterion : loss criterion used for optimization.
         """
 
         losses = AverageMeter()
@@ -68,6 +74,13 @@ class TrainingSession:
 
         """
             Compute loss and accuracy on validation set.
+        
+        ------
+        Parameters :
+
+        criterion : loss criterion to evaluate loss on validation set.
+
+        val_loss_min : current of mininum validation loss across epochs.
         """
 
         losses = AverageMeter()

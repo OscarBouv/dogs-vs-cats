@@ -1,7 +1,6 @@
 import torch
-from models.vgg import PretrainedVGG19
-from models.base_cnn import BaseCNN
-import os
+from models.vgg.vgg import PretrainedVGG19
+from models.base_cnn.base_cnn import BaseCNN
 import PIL
 
 from torchvision.transforms import Resize, ToTensor, Normalize, Compose
@@ -43,14 +42,13 @@ def main(args):
 
     input = torch.unsqueeze(transform(img), dim=0)
 
-    MODEL_PATH = os.path.join(args.model_path)
-
     if args.conv_net == "base_cnn":
         model = BaseCNN()
-        model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
+        model.load_state_dict(torch.load(args.model_path, map_location="cpu"))
 
     if args.conv_net == "vgg":
         model = PretrainedVGG19()
+        model.load_state_dict(torch.load(args.model_path, map_location="cpu"))
 
     model.eval()
 

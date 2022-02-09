@@ -1,5 +1,5 @@
 class AverageMeter(object):
-    """Computes and stores the average and current value"""
+    """Computes and stores the average and current value of a metric."""
     def __init__(self):
         self.val = 0
         self.avg = 0

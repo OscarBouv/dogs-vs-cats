@@ -1,16 +1,14 @@
 import os
 from torch.utils.data import Dataset, DataLoader, Subset
-
-from torchvision.transforms import Compose, Resize, ToTensor
-
+from torchvision.transforms import ToTensor
 import PIL
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 class DogsVsCatsDataset(Dataset):
     """
-        Dataset class to load and preprocess dogs-vs-cats data from Kaggle.
+        Dataset, inherit from torch.utils.data.Dataset
+        to load and preprocess dogs-vs-cats data from Kaggle.
     """
 
     def __init__(self, img_dir, transform=None):
@@ -49,6 +47,12 @@ class ValSplit():
     def get_train_val_loader(self, dataset, batch_size=32):
         """
             Return train and validation dataloaders for training.
+
+        -----
+        Parameters :
+
+        dataset : dataset of class that inherits torch.utils.data.Dataset
+        batch_size : batch size for loader
         """
 
         if self.validation_split > 0:
@@ -81,25 +85,12 @@ class ValSplit():
 
 if __name__ == "__main__":
 
-    transform = Compose([Resize((224, 224)),
-                         ToTensor()
-                         ])
+    ("Testing train/val split (10%) rate ...")
 
-    dataset = DogsVsCatsDataset("data/train/", transform=transform)
+    dataset = DogsVsCatsDataset("data/train/", transform=ToTensor())
 
     val_split = ValSplit(0.1)
     train_loader, val_loader = val_split.get_train_val_loader(dataset, 1)
 
-    x, y = next(iter(train_loader))
-
-    plt.imshow(x[0, :, :, :].permute(1, 2, 0))
-    plt.savefig("test_train.png")
-
-    print(y)
-
-    x, y = next(iter(val_loader))
-
-    plt.imshow(x[0, :, :, :].permute(1, 2, 0))
-    plt.savefig("test_val.png")
-
-    print(y)
+    print(f"Number of train images {len(train_loader)}")
+    print(f"Number of valid images {len(val_loader)}")

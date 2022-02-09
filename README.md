@@ -1,14 +1,24 @@
 # Dogs-vs-cats classification : training and serving.
 
-We are aiming to implement with Pytorch Dog vs Cat classifier and provide commands to launch server using Docker for deployment.
+This project aims to implement with Pytorch Dog vs Cat classifiers, and provide commands to launch server using Torch and Docker.
+
+All the command lines listed must be run from root of project.
 
 ## Repository Structure
 
-[models/](./models) contains all necessary files for defining models, saved models, and a handler file used for serving.
+[``models/``](./models) contains all necessary files for  models, saved models, and a handler file used for serving.
 
-[parsers/](./parsers) contains parsers for both training and prediction Python scripts.
+[``parsers/``](./parsers) contains parsers for both training and prediction Python scripts.
 
-[deployment/](./deployment) contains necessary files for model serving using Torchserve or/and Docker.
+[``deployment/``](./deployment) contains necessary files and directory for model serving using Torchserve and Docker.
+
+[``dataset.py``](dataset.py) defines dataset preprocessing classes for training.
+
+[``train.py``](train.py) defines training session used in ``train_main.py``.
+
+[``train_main.py``](train_main.py) runs a training session using parsed arguments.
+
+[``predict_main.py``](predict_main.py) runs a simple python prediction script using parsed arguments.
 
 
 ## Install required packages
@@ -23,9 +33,9 @@ pip install requirements.txt
 
 This project is using Dogs-vs-Cats Kaggle dataset available at this [link](https://www.kaggle.com/c/dogs-vs-cats/data).
 
-Training data is composed of 25000 images of various sizes, 12500 are dog images, 12500 are cat images. Train images directory is located at [data/train/](./data/train)
+Training data is composed of 25000 images of various sizes, 12500 are dog images, 12500 are cat images. Train images directory is located at [``data/train/``](./data/train)
 
-Testing data is composed of 12500 images, and will be used for server inferences. Test images directory is located at [data/test1/](./data/test1)
+Testing data is composed of 12500 images, and will be used for server inferences. Test images directory is located at [``data/test1/``](./data/test1)
 
 Examples of training images :
 
@@ -36,7 +46,7 @@ Examples of training images :
 In this project, 2 models are trainable and usable.
 
 - A "basic" CNN  [`base_cnn.py`](./models/base_cnn/base_cnn.py): composed of 4 convolutional blocks (Conv layer, BatchNorm, Relu, Dropout) each followed by a MaxPooling operation (of dimension 2), and of increasing output channels (64, 128, 256, and 512). Final classifier is composed of 1 hidden fully-connected layer of size 100.
-- Pretrained VGG19 [`vgg.py`](./models/vgg/vgg.py) : deep VGG convnet, pretrained on ImageNet dataset of more than 14 million image for classification (20k classes). Final classifier is adapted for image binary classification. See this [Pytorch link](https://pytorch.org/vision/main/generated/torchvision.models.vgg19_bn.html) for more complete documentation on Pretrained model.
+- Pretrained VGG19 [`vgg.py`](./models/vgg/vgg.py) : deep VGG convnet, pretrained on ImageNet dataset of more than 14 million image for classification (20k classes). Final classifier is adapted for image binary classification. See this [Pytorch link](https://pytorch.org/vision/main/generated/torchvision.models.vgg19_bn.html) for more complete documentation on pretrained model.
 
 By default, the model is running on a cuda GPU if available, else running on CPU. To change it, edit [`train_main.py`](./train_main.py).
 
@@ -48,26 +58,26 @@ During training, at each epoch, **if validation loss decreases**, model state di
 
 After 10 epochs, the "basic" CNN model converges and reaches an accuracy of around 87% on validation set (10% split).
 
-To run same training procedure that generated saved model `model_base_cnn.pth`, one should run following command :
+To run same training procedure that generated saved model `model_base_cnn.pth`, run the following command :
 
 ```bash
-python train_main.py --conv_net "base_cnn" --dropout 0.2 --batch_size 32 \
+python train_main.py --conv_net base_cnn --dropout 0.2 --batch_size 32 \
                      --validation_split 0.1 --lr 1e-3 \
-                     --weight_decay 0 --betas (0.9, 0.999) --epochs 10 \
-                     --model_path "models/base_cnn/model_base_cnn.pth" 
+                     --weight_decay 0 --betas 0.9, 0.999 --epochs 10 \
+                     --model_path models/base_cnn/model_base_cnn.pth
 ```
 
 ### Pretrained VGG
 
 After 3 epochs, the Pretrained VGG model converges and reaches an accuracy of around 94% on validation set (10% split).
 
-To run same training procedure that generated saved model `model_vgg.pth`, one should run following command :
+To run same training procedure that generated saved model `model_vgg.pth`, run the following command :
 
 ```bash
-python train_main.py --conv_net "base_cnn" --dropout 0.5 --batch_size 32
-                             --validation_split 0.1 --lr 1e-3
-                             --weight_decay 0 --betas (0.9, 0.999) --epochs 3
-                             --model_path "models/vgg/model_vgg.pth" 
+python train_main.py --conv_net vgg --dropout 0.5 --batch_size 32
+                     --validation_split 0.1 --lr 1e-3
+                     --weight_decay 0 --betas 0.9 0.999 --epochs 3
+                     --model_path models/vgg/model_vgg.pth 
 ```
 
 Train flags stands for:
@@ -84,17 +94,17 @@ Train flags stands for:
 
 ## Predicting
 
-In this part, we are using very simple Python script to pass an image to a trained and outputs both image and predicted label.
+In this part, we are using very simple Python script to pass an image to a trained model and outputs both image and predicted label.
 
 Example, using VGG:
 
 ```bash
-python predict_main.py --conv_net "vgg" --img_path data/test1/2124.jpg --model_path "models/vgg/model_vgg.pth"
+python predict_main.py --conv_net vgg --img_path data/test1/2124.jpg --model_path models/vgg/model_vgg.pth
 ```
 
 ## Server
 
-In this part, a server 
+In this part, we will serve the previously trained and saved models, using [**Torchserve**](https://pytorch.org/serve/). 
 
 To use **Torchserve**, one has to build some key files:
 
@@ -108,9 +118,11 @@ To use **Torchserve**, one has to build some key files:
 
 ### Archive model
 
-This step is not mandatory, as .MAR files are already built in [deployment/model-store/](./deployment/model-store/)
+In this part, we will built ready-to-serve model files, stored as .MAR files.
 
-However, one could overwrite model MAR archives by first importing [`torch-model-archiver`](https://github.com/pytorch/serve/blob/master/model-archiver/README.md) package.
+**This step is not mandatory, as .MAR files are already built in** [**deployment/model-store/**](./deployment/model-store/)
+
+However, one could overwrite model MAR files by first importing [`torch-model-archiver`](https://github.com/pytorch/serve/blob/master/model-archiver/README.md) package.
 
 ```bash
 pip install torch-model-archiver
@@ -118,20 +130,20 @@ pip install torch-model-archiver
 
 Then run the following archiver command :
 
-Base CNN : 
+**Base CNN :**
 
 ```bash
 torch-model-archiver --model-name base_cnn  --version 1.0 --model-file models/base_cnn/base_cnn.py \
---serialized-file models/base_cnn/model_base_cnn.pth  --extra-files models/index_to_name.json \
---handler models/handler.py --export-path deployment/model-store -f
+                     --serialized-file models/base_cnn/model_base_cnn.pth  --extra-files models/index_to_name.json \
+                     --handler models/handler.py --export-path deployment/model-store -f
 ```
 
-VGG : 
+**VGG :**
 
 ```bash
 torch-model-archiver --model-name vgg  --version 1.0 --model-file models/vgg/vgg.py \
---serialized-file models/vgg/model_vgg.pth  --extra-files models/index_to_name.json \
---handler models/handler.py --export-path deployment/model-store -f
+                     --serialized-file models/vgg/model_vgg.pth  --extra-files models/index_to_name.json \
+                     --handler models/handler.py --export-path deployment/model-store -f
 ```
 Torch-model-archiver's used flags stand for:
 
@@ -147,58 +159,64 @@ Torch-model-archiver's used flags stand for:
 
 
 ### Using only Torchserve
-Server command : 
+Once models are archived, we can serve them, first using Torchserve.
 
 ```bash
-torchserve --start --ncs --ts-config deployment/config.properties --model-store deployment/model-store --models vgg=vgg.mar
+torchserve --start --ncs --ts-config deployment/config.properties --model-store deployment/model-store \
+           --models vgg=vgg.mar base_cnn=base_cnn.mar
 ```
 
 Torchserve's used flags stand for:
 
---start: means that you want to start the TorchServe service (deploy the APIs).
---ncs: means that you want to disable the snapshot feature (optional).
---ts-config: to include the configuration file which is something optional too.
---model-store: is the directory where the MAR files are stored.
---models: is(are) the name(s) of the model(s) that will be served on the startup, including both an alias which will be the API endpoint of that concrete model and the filename of that model, with format endpoint=model_name.mar.
+``--start`` : means that you want to start the TorchServe service (deploy the APIs).\
+``--ncs`` : means that you want to disable the snapshot feature (optional).\
+``--ts-config`` : to include the configuration file which is something optional too.\
+``--model-store`` : is the directory where the MAR files are stored.\
+``--models ``: is(are) the name(s) of the model(s) that will be served on the startup, including both an alias which will be the API endpoint of that concrete model and the filename of that model, with format endpoint=model_name.mar.\
 
 ### Using Docker
 
-Build ubuntu-torchserve image, using files in [deployment/](./deployment)
+We can do the same in docker.
+
+To pull torchserve docker image, use this command line.
 
 ```bash
-docker build -t ubuntu-torchserve:latest deployment/
+docker pull pytorch/torchserve
 ```
-Definition of latest
-
-Launch server
+To launch docker server container, you can use the following command line :
 
 ```bash
-docker run --rm --name torchserve_docker \
-           -p8080:8080 -p8081:8081 -p8082:8082 \
-           ubuntu-torchserve:latest \
-           torchserve --model-store /home/model-server/model-store/ --models vgg=vgg.mar
+docker run --rm -p8080:8080 -p 8081:8081 -p8082:8082 --name torchserve_docker\
+           -v $(pwd)/deployment/model-store:/home/model-server/model-store \
+           pytorch/torchserve:latest
+           torchserve --model-store /home/model-server/model-store/ --models base_cnn.mar vgg=vgg.mar 
 ```
+where `-v` argument is used to copy the `model-store` directory located in `./deployment` in docker image.
 
 ### Inference
 
-For example to infer the label of the following image, stored in [/data/test1/2124.jpg](/data/test1/2124.jpg), run the following command : 
+Once you have launch server using **Docker** or **Torchserve**, inference of the model is possible.
+
+For example to infer the label of the following image, stored in [/data/test1/2124.jpg](/data/test1/2124.jpg), open a new terminal, go to root of project and run the following command : 
 
 ![Example inference image](./data/test1/2124.jpg)
 
 ```bash
-curl -X POST http://localhost:8080/predictions/vgg -T dogs-vs-cats/data/test1/2124.jpg
+curl -X POST http://localhost:8080/predictions/base_cnn -T data/test1/2124.jpg
 ```
 
 This should output the following answer :
  
  `
 {
-  "dog": 0.999045193195343
+  "dog": 0.8020902276039124
 }
 `
-where label and associated probability is written in a JSON file, and available at management address defined in [`config.properties`](deployment/config.properties).
+where label and associated probability is written in a JSON file.
 
-To stop the serve :
+Change `http://localhost:8080/predictions/base_cnn` to `http://localhost:8080/predictions/vgg` to infer predictions with VGG (a bit longer).
+
+To stop **Torchserve** :
 
 ```bash
 torchserve --stop

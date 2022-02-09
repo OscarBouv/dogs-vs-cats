@@ -1,6 +1,6 @@
 # Dogs-vs-cats classification : training and serving.
 
-This project aims to implement with Pytorch Dog vs Cat classifiers, and provide commands to launch server using Torch and Docker.
+This project aims to implement with Pytorch Dog vs Cat classifiers, and provide commands to launch server using Torchserve and Docker.
 
 All the command lines listed must be run from root of project.
 

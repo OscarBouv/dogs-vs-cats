@@ -3,6 +3,7 @@ from torchvision import models
 from collections import OrderedDict
 
 import torch
+
 class PretrainedVGG19(nn.Module):
 
     """
@@ -47,10 +48,15 @@ class PretrainedVGG19(nn.Module):
 
 if __name__ == "__main__":
 
+    print("Sanity test :")
+
     print("Generating a batch of random images of size (50, 3, 224, 224)")
 
     x = torch.randn(size=(50, 3, 224, 224))
+
+    print("Passing it to model ...")
+
     model = PretrainedVGG19()
 
     print("Output size should be (50, 2)")
-    print(f'Output shape : {model(x).size}')
+    print(f'Output shape : {model(x).shape}')

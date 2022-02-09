@@ -74,7 +74,7 @@ class TrainingSession:
 
         """
             Compute loss and accuracy on validation set.
-        
+
         ------
         Parameters :
 
@@ -153,6 +153,3 @@ class TrainingSession:
 
         print("End of training.")
 
-
-if __name__ == "__main__":
-    pass

@@ -64,6 +64,7 @@ class ValSplit():
             train_indices = indices[int(self.validation_split * len(dataset)):]
             val_indices = indices[0:int(self.validation_split * len(dataset))]
 
+            # Define train and valid loader
             train_loader = DataLoader(Subset(dataset, train_indices),
                                       batch_size=batch_size,
                                       shuffle=True)
@@ -84,6 +85,8 @@ class ValSplit():
 
 
 if __name__ == "__main__":
+
+    print("Sanity test :")
 
     ("Testing train/val split (10%) rate ...")
 

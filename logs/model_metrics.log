@@ -1,8 +1,0 @@
-2022-02-08T10:35:12,902 - HandlerTime.Milliseconds:1429.09|#ModelName:vgg,Level:Model|#hostname:macbook-air-de-oscar.home,requestID:14814099-bcfc-4eb6-9d22-4871c627281e,timestamp:1644312912
-2022-02-08T10:35:12,900 - HandlerTime.Milliseconds:1046.53|#ModelName:vgg,Level:Model|#hostname:macbook-air-de-oscar.home,requestID:94dc9717-10b1-4d6b-bef3-1026ea9ed222,timestamp:1644312912
-2022-02-08T10:35:12,914 - PredictionTime.Milliseconds:1047.49|#ModelName:vgg,Level:Model|#hostname:macbook-air-de-oscar.home,requestID:94dc9717-10b1-4d6b-bef3-1026ea9ed222,timestamp:1644312912
-2022-02-08T10:35:12,915 - PredictionTime.Milliseconds:1430.77|#ModelName:vgg,Level:Model|#hostname:macbook-air-de-oscar.home,requestID:14814099-bcfc-4eb6-9d22-4871c627281e,timestamp:1644312912
-2022-02-08T10:35:15,516 - HandlerTime.Milliseconds:989.99|#ModelName:vgg,Level:Model|#hostname:macbook-air-de-oscar.home,requestID:111526b6-b552-488f-89f3-a2bee0ea5e24,timestamp:1644312915
-2022-02-08T10:35:15,517 - PredictionTime.Milliseconds:990.44|#ModelName:vgg,Level:Model|#hostname:macbook-air-de-oscar.home,requestID:111526b6-b552-488f-89f3-a2bee0ea5e24,timestamp:1644312915
-2022-02-08T10:35:26,423 - HandlerTime.Milliseconds:785.3|#ModelName:vgg,Level:Model|#hostname:macbook-air-de-oscar.home,requestID:0b3e80fb-e3dd-43a0-9898-680ce5817c82,timestamp:1644312926
-2022-02-08T10:35:26,424 - PredictionTime.Milliseconds:785.92|#ModelName:vgg,Level:Model|#hostname:macbook-air-de-oscar.home,requestID:0b3e80fb-e3dd-43a0-9898-680ce5817c82,timestamp:1644312926

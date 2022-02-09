@@ -1,14 +1,16 @@
 import os
 from torch.utils.data import Dataset, DataLoader, Subset
-from torchvision.transforms import Compose, Resize, ToTensor, Normalize
+
+from torchvision.transforms import Compose, Resize, ToTensor
 
 import PIL
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 class DogsVsCatsDataset(Dataset):
     """
-        Class to handle special case of dataset loading for dogs-vs-cats data.
+        Dataset class to load and preprocess dogs-vs-cats data from Kaggle.
     """
 
     def __init__(self, img_dir, transform=None):
@@ -54,6 +56,7 @@ class ValSplit():
             indices = np.arange(0, len(dataset), dtype=int)
             np.random.shuffle(indices)
 
+            # Define train and valid indices to subset dataset
             train_indices = indices[int(self.validation_split * len(dataset)):]
             val_indices = indices[0:int(self.validation_split * len(dataset))]
 
@@ -68,7 +71,7 @@ class ValSplit():
             return train_loader, val_loader
 
         else:
-            #No split
+            # No split
             train_loader = DataLoader(dataset,
                                       batch_size=batch_size,
                                       shuffle=True)

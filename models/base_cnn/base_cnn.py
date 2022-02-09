@@ -5,14 +5,14 @@ import torch
 class BaseCNN(nn.Module):
     """
         Base CNN composed of 4 conv blocks (Conv layer, BatchNorm, Relu, Dropout)
-        1 FC block classification layer.
+        1 FC classification layer.
 
         First block : 64 output channels.
         Second block : 128 outputs channels.
         Third block : 256 outputs channels.
         Fourth block : 512 outputs channels.
 
-        FC block : output dim 100
+        FC layer : output dim 100
 
         Classification layer : output dim 2
 
@@ -20,7 +20,9 @@ class BaseCNN(nn.Module):
         Input : torch tensor of size (B, 3, 224)
 
         -------
-        Parameter : dropout rate.
+        Parameters
+
+        dropout : dropout rate.
     """
 
     def __init__(self, dropout=0.2):
